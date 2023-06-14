@@ -16,7 +16,6 @@ class UserView(View):
             try:
                 user.set_password(user.password)
             except ValidationError as ve:
-                logging.error(f"Error while setting password: {ve.message}")
                 return JsonResponse({"error": ve.messages}, status=400)
             token = user.generate_jwt_token()
             user.save()
@@ -41,16 +40,12 @@ class UserView(View):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return JsonResponse({"error": "User not found"}, status=404)
-
         data = json.loads(request.body)
 
         if UserProperty.password in data:
             try:
                 user.set_password(data[UserProperty.password])
             except ValidationError as ve:
-                logging.error(
-                    f"Error while updating password for user:{email} and error: {ve.message}"
-                )
                 return JsonResponse({"error": ve.messages}, status=400)
         if UserProperty.full_name in data:
             user.full_name = data[UserProperty.full_name]
